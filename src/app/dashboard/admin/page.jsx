@@ -56,6 +56,7 @@ export default function AdminPage() {
                 method: "GET",
             });
             setAdmins(res.admins || []);
+            console.log(res.admins)
         } catch (err) {
             toast.error(err.message || "Failed to fetch admins");
         } finally {
@@ -112,9 +113,10 @@ export default function AdminPage() {
 
             if (res?.success) {
                 toast.success("Admin created successfully");
-                setAdmins((prev) => [res.admin, ...prev]);
-                setNewAdmin({ username: "", password: "" });
+                // setAdmins((prev) => [res.admin, ...prev]);
+                // setNewAdmin({ username: "", password: "" });
                 setDialogOpen(false); // ✅ Close the dialog
+                fetchAdmins()
             } else {
                 toast.error(res.message || "Failed to create admin");
             }
@@ -183,15 +185,16 @@ export default function AdminPage() {
             {loading ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {Array.from({ length: 3 }).map((_, i) => (
-                        <Skeleton key={i} className="h-24 rounded-lg" />
+                        <Skeleton key={`skeleton-${i}`} className="h-24 rounded-lg" />
                     ))}
+
                 </div>
             ) : admins.length === 0 ? (
                 <p className="text-muted-foreground">No admins found.</p>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {admins.map((admin) => (
-                        <Card key={admin._id} className="shadow-sm">
+                        <Card key={admin._id || admin.username || Math.random()} className="shadow-sm">
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between">
                                     <span className="capitalize">{admin.username}</span>
