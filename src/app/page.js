@@ -1,5 +1,4 @@
 import { LoginForm } from "@/components/login-form";
-import ParticlesBackground from "@/components/ParticlesBackground"; // 👈 import it
 import React from "react";
 
 const page = () => {

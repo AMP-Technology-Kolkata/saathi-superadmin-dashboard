@@ -42,8 +42,6 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tabler/icons-react": "^3.34.1",
     "@tanstack/react-table": "^8.21.3",
-    "@tsparticles/react": "^3.0.0",
-    "@tsparticles/slim": "^3.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -62,7 +60,6 @@
     "recharts": "^2.15.4",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
-    "tsparticles": "^3.9.0",
     "vaul": "^1.1.2",
     "zod": "^4.0.11"
   },
