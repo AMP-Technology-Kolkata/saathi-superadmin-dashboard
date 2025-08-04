@@ -5,8 +5,6 @@ import React from "react";
 const page = () => {
   return (
     <div className="relative min-h-svh overflow-hidden">
-      {/* Particle Background */}
-      {/* <ParticlesBackground /> */}
 
       {/* Login Content Layer */}
       <div className="relative z-10 flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
