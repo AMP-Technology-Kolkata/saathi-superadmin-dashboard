@@ -46,7 +46,7 @@ const data = {
     //   icon: IconDashboard,
     // },
     {
-      title: "Admin",
+      title: "Admin Management",
       url: "/dashboard/admin",
       icon: IconListDetails,
     },
