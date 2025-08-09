@@ -963,7 +963,7 @@ export default function AdminPage() {
                                     </TableCell>
                                     <TableCell>
                                         {admin.expiryDate ? (
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col justify-center items-center">
                                                 <span className="text-sm font-medium">
                                                     {format(new Date(admin.expiryDate), "MMM d, yyyy")}
                                                 </span>
@@ -972,9 +972,9 @@ export default function AdminPage() {
                                                 </span> */}
                                                 <Button
                                                     size="sm"
-                                                    className={`px-2 py-1 rounded-md text-white transition-colors ${new Date(admin.expiryDate) < new Date()
+                                                    className={`w-full mt-1 rounded-md text-white transition-colors ${new Date(admin.expiryDate) < new Date()
                                                         ? "bg-red-500 hover:bg-red-600"
-                                                        : "bg-blue-500 hover:bg-blue-600"
+                                                        : "bg-primary hover:bg-primary/80"
                                                         }`}
                                                     onClick={() => handleOpenRenewDialog(admin)}
                                                 >
