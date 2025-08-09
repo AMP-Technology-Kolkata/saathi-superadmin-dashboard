@@ -66,6 +66,10 @@ export default function AdminPage() {
     const [viewMode, setViewMode] = useState("table");
     const [showPassword, setShowPassword] = useState(false);
     const [otpResendCooldown, setOtpResendCooldown] = useState(0);
+    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+    const [selectedAdmin, setSelectedAdmin] = useState(null);
+    const [newExpiryDate, setNewExpiryDate] = useState(null);
+    const [renewing, setRenewing] = useState(false);
 
     const [newAdmin, setNewAdmin] = useState({
         otp: "",
@@ -328,6 +332,53 @@ export default function AdminPage() {
         }
     };
 
+    const handleOpenRenewDialog = (admin) => {
+        setSelectedAdmin(admin);
+        setNewExpiryDate(null);
+        setRenewDialogOpen(true);
+    };
+
+    const handleRenewExpiry = async () => {
+        if (!selectedAdmin || !newExpiryDate) {
+            toast.error("Please select a valid future date.");
+            return;
+        }
+
+        if (newExpiryDate <= new Date()) {
+            toast.error("Expiry date must be in the future.");
+            return;
+        }
+
+        try {
+            setRenewing(true);
+            const res = await api({
+                endpoint: "/api/superadmin/update-admin-expiry",
+                method: "PATCH",
+                data: {
+                    adminId: selectedAdmin._id,
+                    expiryDate: newExpiryDate
+                }
+            });
+
+            if (res?.success) {
+                toast.success("Expiry date updated successfully.");
+                setAdmins((prev) =>
+                    prev.map((admin) =>
+                        admin._id === selectedAdmin._id
+                            ? { ...admin, expiryDate: newExpiryDate }
+                            : admin
+                    )
+                );
+                setRenewDialogOpen(false);
+            } else {
+                toast.error(res?.message || "Failed to update expiry date.");
+            }
+        } catch (err) {
+            toast.error(err.message || "Error updating expiry date.");
+        } finally {
+            setRenewing(false);
+        }
+    };
 
     const filteredAdmins = admins.filter((admin) =>
         admin.officerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -647,6 +698,59 @@ export default function AdminPage() {
                             )}
                         </DialogContent>
                     </Dialog>
+                    <Dialog open={renewDialogOpen} onOpenChange={setRenewDialogOpen}>
+                        <DialogContent className="sm:max-w-[400px]">
+                            <DialogHeader>
+                                <DialogTitle>Renew Admin Expiry</DialogTitle>
+                                <DialogDescription>
+                                    Select a new expiry date for{" "}
+                                    <strong>{selectedAdmin?.officerName}</strong>.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="py-4">
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            className={`w-full justify-start text-left font-normal ${!newExpiryDate ? "text-muted-foreground" : ""
+                                                }`}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {newExpiryDate
+                                                ? format(newExpiryDate, "PPP")
+                                                : "Pick a new expiry date"}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={newExpiryDate}
+                                            onSelect={setNewExpiryDate}
+                                            disabled={(date) => date <= new Date()}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setRenewDialogOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleRenewExpiry} disabled={renewing || !newExpiryDate}>
+                                    {renewing ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...
+                                        </>
+                                    ) : (
+                                        "Update Expiry"
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
                 </div>
             </div>
 
@@ -866,6 +970,16 @@ export default function AdminPage() {
                                                 {/* <span className="text-xs text-gray-500">
                                                     {format(new Date(admin.expiryDate), "h:mm a")}
                                                 </span> */}
+                                                <Button
+                                                    size="sm"
+                                                    className={`px-2 py-1 rounded-md text-white transition-colors ${new Date(admin.expiryDate) < new Date()
+                                                        ? "bg-red-500 hover:bg-red-600"
+                                                        : "bg-blue-500 hover:bg-blue-600"
+                                                        }`}
+                                                    onClick={() => handleOpenRenewDialog(admin)}
+                                                >
+                                                    Renew
+                                                </Button>
                                             </div>
                                         ) : (
                                             <span className="text-sm text-gray-500 italic">No Expiry</span>
@@ -941,8 +1055,8 @@ export default function AdminPage() {
                                         <p className="text-sm text-muted-foreground">Expiry Date</p>
                                         <p
                                             className={`font-medium ${admin.expiryDate && new Date(admin.expiryDate) < new Date()
-                                                    ? "text-red-600"
-                                                    : ""
+                                                ? "text-red-600"
+                                                : ""
                                                 }`}
                                         >
                                             {admin.expiryDate
@@ -964,13 +1078,29 @@ export default function AdminPage() {
                                 </div>
                             </CardContent>
 
-                            <CardFooter className="flex justify-between">
-                                <div className="text-sm text-muted-foreground">Registration Code</div>
-                                <Badge variant="outline">{admin.registrationCode}</Badge>
+                            <CardFooter className="flex flex-col items-start space-y-2">
+                                <div className="text-sm text-muted-foreground">Registration Code
+
+                                    <Badge variant="outline" className={" ml-3"}>{admin.registrationCode}</Badge>
+                                </div>
+
+                                <div className="flex items-center justify-between w-full">
+                                    <Button
+                                        size="sm"
+                                        className={`px-3 py-1 w-full text-white rounded-md transition-colors ${new Date(admin.expiryDate) < new Date()
+                                            ? "bg-red-500 hover:bg-red-600"
+                                            : "bg-primary hover:bg-primary/80"
+                                            }`}
+                                        onClick={() => handleOpenRenewDialog(admin)}
+                                    >
+                                        Renew
+                                    </Button>
+                                </div>
                             </CardFooter>
                         </Card>
 
                     ))}
+
                 </div>
             )}
         </div>
