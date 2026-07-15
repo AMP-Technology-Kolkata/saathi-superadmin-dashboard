@@ -1,6 +1,9 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_BASE_URL: https://sos-backend.amptechnology.in
     container_name: super-admin
     restart: unless-stopped
     env_file:

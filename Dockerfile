@@ -9,6 +9,11 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# ✅ Accept NEXT_PUBLIC_* vars at build time (Next.js bakes these into the client bundle)
+ARG NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+
 RUN npm run build
 
 # ---- Production runner ----
