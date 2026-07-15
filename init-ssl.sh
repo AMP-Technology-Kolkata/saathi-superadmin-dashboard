@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-DOMAIN=""
+DOMAIN="admin-saathi.amptechnology.in"
 EMAIL="devs.amptechnology@gmail.com"
 APP_CONTAINER="super-admin"
 APP_PORT="3051"
